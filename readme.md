@@ -3,33 +3,54 @@ Plotter
 
 ## Schema
 
-The following schema describes the data ingested by the web component. The keys `domain` and `range` define the x and y intervals visible on the chart. Key `functions` instead has an array of objects as value, each object describes a function. The function has a `name`, multiple functions may share the same `name` if they can be considered as an unique function definition. The function has also a `cssClass`, which is useful for adding style. Keys `line` and `point` both have an array of objects with a `coordinates` key describing the data. Data in `lines` will be visualized as a line; data in `points` will be visualized as a series of points (small circles), which may be empty or not depending on key `empty`.
+The schema is inspired by D3 and it is designed with the following goals in mind:
+
+* The data model should describe a list of one or more of states.
+* Each state describes one or more visual elements, like lines and points. Elements are useful to draw one or more mathematical functions, possibly with included (or excluded) points and labels.
+* Elements are identified by ids, so that we can recognize the same element on different states and trigger transitions if needed. We may use the enter/update/exit pattern.
+
+```
+// a list of states
+[
+	{...},
+	...
+]
+```
+
+Each `state` has the following structure:
 
 ```
 {
-  domain: [0, 1],
-  range: [0, 1],
-  functions: [
-    {
-      name: 'f1'
-      line: [
-        {
-          coordinates: [0.5, 0,23]
-        },
-        {
-          coordinates: [0.7, 0,33]
-        },
-        ...
-      ],
-      points: [
-        {
-          coordinates: [0.5, 0,23],
-          empty: false
-        },
-        ...
-      ]
-    },
-    ...
-  ]
+	id: "state1", // State id, optional
+	description: "" // State description, optional
+	xInterval: [0, 1],
+	yInterval: [0, 1],
+	elements: [ // The order of elements determines the stack.
+		{
+			id: "e1" // Element id
+			type: "line", // Element type
+			data: [
+				{
+					x: 0.1,
+					y: 0.3
+				},
+				...
+			],
+		},
+		{
+			id: "e2"
+			type: "points",
+			data: [
+				{
+					x: 0.2,
+					y: 0.4,
+					label: "a label", // Optional
+					included: false // Optional, defaults to true
+				},
+				...
+			]
+		},
+		...
+	]
 }
 ```
